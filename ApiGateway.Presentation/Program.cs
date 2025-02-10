@@ -37,14 +37,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseMiddleware<AttachSignatureToRequest>();
 
+app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 app.UseCors();
 
-app.UseMiddleware<AttachSignatureToRequest>();
 app.UseOcelot().Wait();
 
 app.Run();
