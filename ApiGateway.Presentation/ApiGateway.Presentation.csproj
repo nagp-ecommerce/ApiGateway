@@ -4,9 +4,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+    <UserSecretsId>78202101-be6c-47ff-be42-b3cf3b96afcd</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
     <PackageReference Include="Ocelot" Version="23.4.2" />
     <PackageReference Include="Ocelot.Cache.CacheManager" Version="23.4.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
