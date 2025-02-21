@@ -1,0 +1,3 @@
+[submodule "Ecommerce.SharedService"]
+	path = Ecommerce.SharedService
+	url = https://github.com/nagp-ecommerce/Ecommerce.SharedService.git
