@@ -1,10 +1,10 @@
-name: Build and Push Docker Image for API Gateway Service
+name: Build and Push Docker Image for Api Gateway Service 
 
 on:
   push:
     branches:
-      - main
-  pull_request:
+      - master
+  workflow_dispatch: 
 
 jobs:
   build-and-push:
@@ -16,12 +16,40 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          submodules: recursive  # Ensures submodules are cloned
+          token: ${{ secrets.GITHUB_TOKEN }}  # This line allows private submodule access
+          fetch-depth: 1
 
       - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.GITHUB_TOKEN   }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build Docker Image
-        run: docker build -t ghcr.io/${{ github.actor }}/api-gateway:latest .
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/api-gateway:latest .
 
       - name: Push Docker Image to GHCR
-        run: docker push ghcr.io/${{ github.actor }}/api-gateway:latest
+        run: docker push ghcr.io/${{ github.repository_owner }}/api-gateway:latest
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Add new image to AWS ECS Task Definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ecomApiGatewayTaskDefinition.json
+          container-name: ecom-auth
+          image: ghcr.io/${{ github.repository_owner }}/api-gateway:latest
+
+      - name: Deploy updated task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ecomApiGatewayTaskDefinition.json
+          service: api-gateway-service
+          cluster: NagpDevCluster
+          wait-for-service-stability: true
+    
