@@ -1,8 +1,152 @@
 {
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
+  "Routes": [
+    // Authentication
+    {
+      "DownstreamPathTemplate": "/api/auth/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "auth-service",
+          "Port": 5000
+        }
+      ],
+      "UpstreamPathTemplate": "/api/auth/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT" ],
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Limit": 1,
+        "Period": "60s",
+        "PeriodTimespan": 10
+      }
+    },
+    // Product Service Api - GET
+    {
+      "DownstreamPathTemplate": "/api/products/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "product-service",
+          "Port": 5002
+        }
+      ],
+      "UpstreamPathTemplate": "/api/products/{id}",
+      "UpstreamHttpMethod": [ "GET" ],
+      // No rate limit as user must get data from Api when moving back and forth
+      "FileCacheOptions": {
+        "Region": "default",
+        "TtlSeconds": 60,
+        "Header": "ecommerce-cache-control"
+      }
+    },
+    // Product Service Api - POST, PUT, DELETE
+    {
+      "DownstreamPathTemplate": "/api/products/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "product-service",
+          "Port": 5002
+        }
+      ],
+      "UpstreamPathTemplate": "/api/products/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "DELETE" ],
+      // No caching for Post data
+      "AuthenticationOptions": {
+        "AllowedScopes": [],
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role": "Admin"
+      }
+    },
+    // Category Service Api - GET
+    {
+      "DownstreamPathTemplate": "/api/category/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "product-service",
+          "Port": 5002
+        }
+      ],
+      "UpstreamPathTemplate": "/api/category/{id}",
+      "UpstreamHttpMethod": [ "GET" ],
+      // No rate limit as user must get data from Api when moving back and forth
+      "FileCacheOptions": {
+        "Region": "default",
+        "TtlSeconds": 60,
+        "Header": "ecommerce-cache-control"
+      }
+    },
+    // Catgeory Service Api - POST
+    {
+      "DownstreamPathTemplate": "/api/category/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "product-service",
+          "Port": 5002
+        }
+      ],
+      "UpstreamPathTemplate": "/api/category/{everything}",
+      "UpstreamHttpMethod": [ "POST" ],
+      // No caching for Post data
+      "AuthenticationOptions": {
+        "AllowedScopes": [],
+        "AuthenticationProviderKey": "Bearer"
+      }
+    },
+    // Search Service Api - GET
+    {
+      "DownstreamPathTemplate": "/api/search/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "search-service",
+          "Port": 5003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/search/{id}",
+      "UpstreamHttpMethod": [ "GET" ],
+      // No rate limit as user must get data from Api when moving back and forth
+      "FileCacheOptions": {
+        "Region": "default",
+        "TtlSeconds": 60,
+        "Header": "ecommerce-cache-control"
+      }
+    },
+    // Search Service Api - POST
+    {
+      "DownstreamPathTemplate": "/api/search/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "search-service",
+          "Port": 5003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/search/{everything}",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+    // sns handler
+    {
+      "DownstreamPathTemplate": "/api/sns/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "search-service",
+          "Port": 5003
+        }
+      ],
+      "UpstreamPathTemplate": "/api/sns/{everything}",
+      "UpstreamHttpMethod": [ "POST" ]
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseURL": "https://api-gateway-service:5001",
+    "RateLimitOptions": {
+      "QuotaExceededMessage":  "You are overwhelming with multiple requests"
     }
   }
 }

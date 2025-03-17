@@ -12,8 +12,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+var env = builder.Environment.EnvironmentName ?? "Development";
 
-builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile($"ocelot.{env}.json", optional: false, reloadOnChange: true);
 builder.Services.AddOcelot().AddCacheManager(x => x.WithDictionaryHandle());
 
 JwtAuthenticationScheme.AddJwtAuthenticationScheme(builder.Services, builder.Configuration);
